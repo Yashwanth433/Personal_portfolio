@@ -54,7 +54,7 @@ A professional portfolio template built with **Next.js 16**, **React 19**, and *
 - ✅ **Blazing Fast Performance**: Leverages Next.js 16 server components and streaming
 - ✅ **App Router**: Uses the modern Next.js App Router architecture
 - ✅ **Easy Customization**: Simple data-driven configuration
-- ✅ **Contact Form**: Integrated email and Telegram notifications
+- ✅ **Contact Form**: Sends messages to the portfolio email using Gmail SMTP
 - ✅ **Blog Integration**: Automatically fetch posts from dev.to
 - ✅ **Dark Theme**: Beautiful gradient design with Lottie animations
 - ✅ **Docker Support**: Easy containerized deployment
@@ -90,7 +90,7 @@ This portfolio leverages the latest Next.js 16 and React 19 capabilities:
 | 🚀 **Projects**   | Showcase your best work with descriptions and links |
 | 🎓 **Education**  | Academic background and certifications              |
 | 📝 **Blog**       | Latest articles from dev.to (auto-fetched)          |
-| 📧 **Contact**    | Get in touch form with email/Telegram integration   |
+| 📧 **Contact**    | Get in touch form with email delivery                |
 
 ---
 
@@ -107,7 +107,6 @@ This portfolio leverages the latest Next.js 16 and React 19 capabilities:
 - [Deployment](#deployment-rocket)
 - [Tutorials](#tutorials-wrench)
   - [Gmail App Password Setup](#gmail-app-password-setup)
-  - [Create a Telegram Bot](#create-a-telegram-bot)
   - [Fetching Blog from dev.to](#fetching-blog-from-devto)
 - [Packages Used](#packages-used-package)
 - [Contributing](#contributing-handshake)
@@ -252,14 +251,7 @@ Create a `.env` file in the root directory with the following variables:
 # Google Tag Manager (Optional - for analytics)
 NEXT_PUBLIC_GTM=GTM-XXXXXXX
 
-# Your deployed app URL
-NEXT_PUBLIC_APP_URL=https://your-domain.com
-
-# Telegram Bot Configuration (for contact form notifications)
-TELEGRAM_BOT_TOKEN=your_bot_token_here
-TELEGRAM_CHAT_ID=your_chat_id_here
-
-# Gmail Configuration (for contact form emails)
+# Gmail account used to send contact-form messages
 GMAIL_PASSKEY=your_gmail_app_password
 EMAIL_ADDRESS=your_email@gmail.com
 ```
@@ -269,13 +261,10 @@ EMAIL_ADDRESS=your_email@gmail.com
 | Variable              | Required | Description                                  |
 | --------------------- | -------- | -------------------------------------------- |
 | `NEXT_PUBLIC_GTM`     | No       | Google Tag Manager ID for analytics tracking |
-| `NEXT_PUBLIC_APP_URL` | Yes      | Your portfolio's public URL                  |
-| `TELEGRAM_BOT_TOKEN`  | No       | Token for Telegram bot notifications         |
-| `TELEGRAM_CHAT_ID`    | No       | Your Telegram chat ID for receiving messages |
-| `GMAIL_PASSKEY`       | No       | Gmail app password for email notifications   |
-| `EMAIL_ADDRESS`       | No       | Your Gmail address for sending emails        |
+| `GMAIL_PASSKEY`       | Yes      | Gmail app password used by Nodemailer          |
+| `EMAIL_ADDRESS`       | Yes      | Gmail account used to send contact messages    |
 
-> **Note**: Contact form features require either Telegram or Gmail configuration (or both).
+The contact form delivers messages to the address in `utils/data/personal-data.js`. Set these variables in `.env` for local development and in your hosting provider's environment settings for deployment. Use a Google App Password, not your Gmail account password. Keep the values private.
 
 ---
 
@@ -391,23 +380,6 @@ docker-compose -f docker-compose.prod.yml up -d
 ```env
 GMAIL_PASSKEY=abcd efgh ijkl mnop
 EMAIL_ADDRESS=your.email@gmail.com
-```
-
----
-
-### 🤖 Create a Telegram Bot
-
-1. Open Telegram and search for `@BotFather`
-2. Send `/newbot` command
-3. Set bot name and username (must end with `bot`)
-4. Copy the bot token
-5. Send a message to your bot
-6. Get chat ID from: `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates`
-7. Add to `.env` file:
-
-```env
-TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
-TELEGRAM_CHAT_ID=123456789
 ```
 
 ---
@@ -556,7 +528,6 @@ pnpm install
 - Verify Gmail App Password is correct (16 characters)
 - Check that 2-Step Verification is enabled on your Google account
 - Ensure `EMAIL_ADDRESS` matches the Gmail account
-- Test Telegram bot token and chat ID separately
 - Check browser console for error messages
 
 </details>
@@ -591,3 +562,5 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ![GitHub forks](https://img.shields.io/github/forks/said7388/developer-portfolio?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/said7388/developer-portfolio)
 ![GitHub license](https://img.shields.io/github/license/said7388/developer-portfolio)
+#   P e r s o n a l _ p o r t f o l i o  
+ 
