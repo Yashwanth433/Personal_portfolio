@@ -1,111 +1,90 @@
-import axios from 'axios';
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { personalData } from '@/utils/data/personal-data';
+import { isValidEmail } from '@/utils/check-email';
 
-// Create and configure Nodemailer transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, 
-  auth: {
-    user: process.env.EMAIL_ADDRESS,
-    pass: process.env.GMAIL_PASSKEY, 
-  },
-});
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, (character) => {
+    const entities = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
 
-// Helper function to send a message via Telegram
-async function sendTelegramMessage(token, chat_id, message) {
-  const url = `https://api.telegram.org/bot${token}/sendMessage`;
-  try {
-    const res = await axios.post(url, {
-      text: message,
-      chat_id,
-    });
-    return res.data.ok;
-  } catch (error) {
-    console.error('Error sending Telegram message:', error.response?.data || error.message);
-    return false;
-  }
-};
-
-// HTML email template
-const generateEmailTemplate = (name, email, userMessage) => `
-  <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f4f4f4;">
-    <div style="max-width: 600px; margin: auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
-      <h2 style="color: #007BFF;">New Message Received</h2>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Message:</strong></p>
-      <blockquote style="border-left: 4px solid #007BFF; padding-left: 10px; margin-left: 0;">
-        ${userMessage}
-      </blockquote>
-      <p style="font-size: 12px; color: #888;">Click reply to respond to the sender.</p>
-    </div>
-  </div>
-`;
-
-// Helper function to send an email via Nodemailer
-async function sendEmail(payload, message) {
-  const { name, email, message: userMessage } = payload;
-  
-  const mailOptions = {
-    from: "Portfolio", 
-    to: process.env.EMAIL_ADDRESS, 
-    subject: `New Message From ${name}`, 
-    text: message, 
-    html: generateEmailTemplate(name, email, userMessage), 
-    replyTo: email, 
-  };
-  
-  try {
-    await transporter.sendMail(mailOptions);
-    return true;
-  } catch (error) {
-    console.error('Error while sending email:', error.message);
-    return false;
-  }
-};
+    return entities[character];
+  });
+}
 
 export async function POST(request) {
+  let payload;
+
   try {
-    const payload = await request.json();
-    const { name, email, message: userMessage } = payload;
-    const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chat_id = process.env.TELEGRAM_CHAT_ID;
-
-    // Validate environment variables
-    if (!token || !chat_id) {
-      return NextResponse.json({
-        success: false,
-        message: 'Telegram token or chat ID is missing.',
-      }, { status: 400 });
-    }
-
-    const message = `New message from ${name}\n\nEmail: ${email}\n\nMessage:\n\n${userMessage}\n\n`;
-
-    // Send Telegram message
-    const telegramSuccess = await sendTelegramMessage(token, chat_id, message);
-
-    // Send email
-    const emailSuccess = await sendEmail(payload, message);
-
-    if (telegramSuccess && emailSuccess) {
-      return NextResponse.json({
-        success: true,
-        message: 'Message and email sent successfully!',
-      }, { status: 200 });
-    }
-
-    return NextResponse.json({
-      success: false,
-      message: 'Failed to send message or email.',
-    }, { status: 500 });
-  } catch (error) {
-    console.error('API Error:', error.message);
-    return NextResponse.json({
-      success: false,
-      message: 'Server error occurred.',
-    }, { status: 500 });
+    payload = await request.json();
+  } catch {
+    return NextResponse.json(
+      { success: false, message: 'Please submit a valid message.' },
+      { status: 400 }
+    );
   }
-};
+
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return NextResponse.json(
+      { success: false, message: 'Please submit a valid message.' },
+      { status: 400 }
+    );
+  }
+
+  const name = typeof payload.name === 'string' ? payload.name.trim() : '';
+  const email = typeof payload.email === 'string' ? payload.email.trim() : '';
+  const message = typeof payload.message === 'string' ? payload.message.trim() : '';
+
+  if (!name || name.length > 100 || !isValidEmail(email) || email.length > 254 || !message || message.length > 500) {
+    return NextResponse.json(
+      { success: false, message: 'Enter a name, valid email address, and message (up to 500 characters).' },
+      { status: 400 }
+    );
+  }
+
+  const sender = process.env.EMAIL_ADDRESS;
+  const passkey = process.env.GMAIL_PASSKEY;
+
+  if (!sender || !passkey) {
+    console.error('Contact email delivery is unavailable: EMAIL_ADDRESS or GMAIL_PASSKEY is not configured.');
+    return NextResponse.json(
+      { success: false, message: 'Email is not configured yet. Please try again later.' },
+      { status: 503 }
+    );
+  }
+
+  const safeName = escapeHtml(name);
+  const safeEmail = escapeHtml(email);
+  const safeMessage = escapeHtml(message).replace(/\r?\n/g, '<br>');
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: sender, pass: passkey },
+  });
+
+  try {
+    await transporter.sendMail({
+      from: `"Portfolio Contact" <${sender}>`,
+      to: personalData.email,
+      replyTo: email,
+      subject: `Portfolio message from ${name.replace(/[\r\n]/g, ' ')}`,
+      text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
+      html: `<div style="font-family:Arial,sans-serif;color:#142015"><h2>New portfolio message</h2><p><strong>Name:</strong> ${safeName}</p><p><strong>Email:</strong> ${safeEmail}</p><p><strong>Message:</strong></p><p>${safeMessage}</p></div>`,
+    });
+
+    return NextResponse.json(
+      { success: true, message: 'Message sent successfully!' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Portfolio email delivery failed:', error);
+    return NextResponse.json(
+      { success: false, message: 'Could not send your message. Please try again later.' },
+      { status: 500 }
+    );
+  }
+}

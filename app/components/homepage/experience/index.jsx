@@ -15,16 +15,16 @@ function Experience() {
         alt="Hero"
         width={1572}
         height={795}
-        className="absolute top-0 -z-10"
+        className="absolute top-0 -z-10 h-auto w-full"
       />
 
       <div className="flex justify-center my-5 lg:py-8">
         <div className="flex  items-center">
-          <span className="w-24 h-[2px] bg-[#1a1443]"></span>
+          <span className="w-8 sm:w-24 h-[2px] bg-[#1a1443]"></span>
           <span className="bg-[#1a1443] w-fit text-white p-2 px-5 text-xl rounded-md">
             Experiences
           </span>
-          <span className="w-24 h-[2px] bg-[#1a1443]"></span>
+          <span className="w-8 sm:w-24 h-[2px] bg-[#1a1443]"></span>
         </div>
       </div>
 
@@ -44,21 +44,21 @@ function Experience() {
                     <div className="p-3 relative">
                       <Image
                         src="/blur-23.svg"
-                        alt="Hero"
+                        alt=""
                         width={1080}
                         height={200}
-                        className="absolute bottom-0 opacity-80"
+                        className="absolute bottom-0 left-0 h-auto w-full opacity-80"
                       />
                       <div className="flex justify-center">
                         <p className="text-xs sm:text-sm text-[#16f2b3]">
                           {experience.duration}
                         </p>
                       </div>
-                      <div className="flex items-center gap-x-8 px-3 py-5">
+                      <div className="flex min-w-0 items-center gap-x-4 px-3 py-5 sm:gap-x-8">
                         <div className="text-violet-500  transition-all duration-300 hover:scale-125">
                           <BsPersonWorkspace size={36} />
                         </div>
-                        <div>
+                        <div className="min-w-0 break-words">
                           <p className="text-base sm:text-xl mb-2 font-medium uppercase">
                             {experience.title}
                           </p>

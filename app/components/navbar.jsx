@@ -1,44 +1,77 @@
-// @flow strict
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { HiMenu, HiX } from "react-icons/hi";
+import { personalData } from "@/utils/data/personal-data";
+
+const navigationLinks = [
+  ["HOME", "top"],
+  ["ABOUT", "about"],
+  ["EXPERIENCE", "experience"],
+  ["SKILLS", "skills"],
+  ["EDUCATION", "education"],
+  ["PROJECTS", "projects"],
+  ["CONTACT", "contact"],
+];
 
 function Navbar() {
-  return (
-    <nav className="bg-transparent">
-      <div className="flex items-center justify-between py-5">
-        <div className="flex flex-shrink-0 items-center">
-          <Link
-            href="/"
-            className=" text-[#16f2b3] text-3xl font-bold">
-            ABU SAID
-          </Link>
-        </div>
+  const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-        <ul className="mt-4 flex h-screen max-h-0 w-full flex-col items-start text-sm opacity-0 md:mt-0 md:h-auto md:max-h-screen md:w-auto md:flex-row md:space-x-1 md:border-0 md:opacity-100" id="navbar-default">
-          <li>
-            <Link className="block px-4 py-2 no-underline outline-none hover:no-underline" href="/#about">
-              <div className="text-sm text-white transition-colors duration-300 hover:text-pink-600">ABOUT</div>
-            </Link>
-          </li>
-          <li>
-            <Link className="block px-4 py-2 no-underline outline-none hover:no-underline" href="/#experience"><div className="text-sm text-white transition-colors duration-300 hover:text-pink-600">EXPERIENCE</div></Link>
-          </li>
-          <li>
-            <Link className="block px-4 py-2 no-underline outline-none hover:no-underline" href="/#skills"><div className="text-sm text-white transition-colors duration-300 hover:text-pink-600">SKILLS</div></Link>
-          </li>
-          <li>
-            <Link className="block px-4 py-2 no-underline outline-none hover:no-underline" href="/#education"><div className="text-sm text-white transition-colors duration-300 hover:text-pink-600">EDUCATION</div></Link>
-          </li>
-          <li>
-            <Link className="block px-4 py-2 no-underline outline-none hover:no-underline" href="/blog"><div className="text-sm text-white transition-colors duration-300 hover:text-pink-600">BLOGS</div></Link>
-          </li>
-          <li>
-            <Link className="block px-4 py-2 no-underline outline-none hover:no-underline" href="/#projects"><div className="text-sm text-white transition-colors duration-300 hover:text-pink-600">PROJECTS</div></Link>
-          </li>
+  const handleNavigation = () => {
+    setIsMenuOpen(false);
+  };
+
+  return (
+    <nav className="site-nav fixed inset-x-0 top-0 z-[100] border-b border-[#1e3b25] bg-[#080d0a]/90 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-[92rem] items-center justify-between px-6 py-4 sm:px-12">
+        <Link href="/" className="bg-gradient-to-r from-[#39ff14] to-[#b5ff3d] bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
+          {personalData.name}
+        </Link>
+
+        <button
+          type="button"
+          className="rounded-md p-2 text-[#39ff14] transition-colors hover:bg-[#39ff14]/10 lg:hidden"
+          aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={isMenuOpen}
+          aria-controls="navbar-links"
+          onClick={() => setIsMenuOpen((open) => !open)}
+        >
+          {isMenuOpen ? <HiX size={26} /> : <HiMenu size={26} />}
+        </button>
+
+        <ul
+          id="navbar-links"
+          className={`${isMenuOpen ? "flex" : "hidden"} absolute left-0 right-0 top-full flex-col border-b border-[#1e3b25] bg-[#080d0a]/95 px-6 py-3 text-sm shadow-lg backdrop-blur-xl lg:static lg:flex lg:flex-row lg:items-center lg:gap-1 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none`}
+        >
+          {navigationLinks.map(([label, sectionId]) => (
+            <li key={label}>
+              {pathname === "/" ? (
+                <a
+                  className="block rounded-md px-4 py-3 text-white transition-colors hover:bg-[#39ff14]/10 hover:text-[#39ff14] lg:py-2"
+                  href={`#${sectionId}`}
+                  onClick={handleNavigation}
+                >
+                  {label}
+                </a>
+              ) : (
+                <Link
+                  className="block rounded-md px-4 py-3 text-white transition-colors hover:bg-[#39ff14]/10 hover:text-[#39ff14] lg:py-2"
+                  href={sectionId === "top" ? "/" : `/#${sectionId}`}
+                  onClick={handleNavigation}
+                  prefetch
+                >
+                  {label}
+                </Link>
+              )}
+            </li>
+          ))}
         </ul>
       </div>
     </nav>
   );
-};
+}
 
 export default Navbar;

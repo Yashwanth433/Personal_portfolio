@@ -18,11 +18,11 @@ function Skills() {
 
       <div className="flex justify-center my-5 lg:py-8">
         <div className="flex  items-center">
-          <span className="w-24 h-[2px] bg-[#1a1443]"></span>
+          <span className="w-8 sm:w-24 h-[2px] bg-[#1a1443]"></span>
           <span className="bg-[#1a1443] w-fit text-white p-2 px-5 text-xl rounded-md">
             Skills
           </span>
-          <span className="w-24 h-[2px] bg-[#1a1443]"></span>
+          <span className="w-8 sm:w-24 h-[2px] bg-[#1a1443]"></span>
         </div>
       </div>
 
@@ -37,7 +37,7 @@ function Skills() {
           direction="left"
         >
           {skillsData.map((skill, id) => (
-            <div className="w-36 min-w-fit h-fit flex flex-col items-center justify-center transition-all duration-500 m-3 sm:m-5 rounded-lg group relative hover:scale-[1.15] cursor-pointer"
+            <div className="w-36 min-w-fit h-fit flex flex-col items-center justify-center transition-all duration-500 m-3 sm:m-5 rounded-lg group relative hover:scale-[1.08]"
               key={id}>
               <div className="h-full w-full rounded-lg border border-[#1f223c] bg-[#11152c] shadow-none shadow-gray-50 group-hover:border-violet-500 transition-all duration-500">
                 <div className="flex -translate-y-[1px] justify-center">
@@ -47,13 +47,19 @@ function Skills() {
                 </div>
                 <div className="flex flex-col items-center justify-center gap-3 p-6">
                   <div className="h-8 sm:h-10">
-                    <Image
-                      src={skillsImage(skill)?.src}
-                      alt={skill}
-                      width={40}
-                      height={40}
-                      className="h-full w-auto rounded-lg"
-                    />
+                    {skillsImage(skill) ? (
+                      <Image
+                        src={skillsImage(skill).src}
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="h-full w-auto rounded-lg"
+                      />
+                    ) : (
+                      <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/20 text-xs font-bold text-[#16f2b3]">
+                        {skill.split(/\s+/).map((word) => word[0]).join("").slice(0, 3).toUpperCase()}
+                      </span>
+                    )}
                   </div>
                   <p className="text-white text-sm sm:text-lg">
                     {skill}

@@ -1,5 +1,7 @@
 .glow-container {
   --spread: 60;
+  overflow: clip;
+  border-radius: 0.75rem;
 }
 
 .glow-card {
